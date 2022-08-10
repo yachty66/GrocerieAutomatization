@@ -48,92 +48,6 @@ detailed flow of app (if not possible input gets typed in --> "No possible input
     Create README at the end and create file with all dependencies
 
 
-    while true
-        --> loop for number breakfast
-        while true
-            input
-            try except
-            setvar 
-            break
-        --> loop for number lunch
-        while true
-            input
-            try except
-            setvar 
-            break
-        --> loop for number dinner
-        while true
-            input
-            try except
-            setvar 
-            break
-        break
-    choosemeal()
-        
-
-choosemeal()
-
-choosemeal func
-        print choose meal 
-        cases 
-            1 1 1 
-                breakfast()
-                lunch()
-                dinner()
-            1 1 0
-                breakfast()
-                lunch()
-            1 0 0
-                breakfast()                
-            0 0 1
-                dinner()
-            0 1 1
-                lunch()
-                dinner()
-            1 0 1
-                breakfast()
-                dinner()
-            0 1 0 
-                lunch()
-            default
-                all zero print exit
-        todoist()
-        print final message and exit
-
-
-breakfast()
-    while true
-        input
-        ----- if input != options print no valid input continue ----
-        try except 
-        setvar
-        break
-repeat with other functions
-
-testing
-    input 3 x int 
-    should display all meal options
-
-ich muss einen fehler werfen wenn input zahl nicht im raum der möglichkeiten ist 
-wenn AZ op
-
-what can i do for getting options?
-parse after every \n and put this in list - ignore last \n
-
-optionsBreakfast
-repeat 2x
-
-def parser
-    parse breakfastMeals[:-1] val after \n append to optionsBreakfast 
-
-go to breakfast() 
-
-repeat 2x 
-
-testing
-    when choosing 3 in question for which meal should always print nvo 
-
-
 '''
 numberBreakfast = 0
 numberLunch = 0
@@ -146,6 +60,7 @@ dinnerMeals =  "\n1 250g Oatmeal Pithy, 1 Apple, 100g Frozen Grapefruit\n2 250g 
 optionsBreakfast = []
 optionsLunch = []
 optionsDinner = []
+
 
 def test():
     l = ["1", "2"]
@@ -205,12 +120,10 @@ def dinner():
         break
 
 def getInput():
-    input = 0
-    input = int(input())
-   # if input == "kill me":
-    #    exit()
-    
-    return input
+    i = input()
+    if i == "kill me":
+        exit()
+    return int(i)
 
 def todoist():
     print("")
