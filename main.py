@@ -1,81 +1,95 @@
-# Notes
-'''
-functions which need to be fullfilled 
-    1. selecting meals
-    2. selecting amount of meals 
-    3. create entries in todoist
-    4. Make it usable for others
+from curses.ascii import isalpha, isdigit
+import re
+from todoist import TodoistAPI
+import config
 
-flow of the app
-    1. Print how the app works
-    2. User selects amount of meals for each category (breakfast, lunch, dinner). 0 if no meals for a categeory 
-    3. menues are displayed and user needs to choose from one 
-    4. if done user needs to confirm and items are automatically added to todoist
+choosedOptions = []
+dictTypeNumber = {}
+dictTypeDay = {}
 
-detailed flow of app (if not possible input gets typed in --> "No possible input." and new line gets displayed)
-    1. run script
-    2. Description gets displayed (with exit option == kill me)
-        - You can exit the program at every time. Just type "kill me" without brackets.
-    3. Display meal amount options (user needs to input something for next result 0 if 0 meals. If 0 meals choosen respond with "No meals choosen." and exit program). 
-        1. How many breakfast meals do you wanna shop?
-        2. How many lunch meals do you wanna eat?
-        3. How many Dinner meals do you wanna eat?
-    4. Display "Now choose meal." (displays now in the hyrarchy B,L,D meals. based on if certain option was choosen (Example: B=0,L=2,D=3 displays L,D but no B because not choosen))
-    5. 
-    
-    Breakfast
-        1. 2 Toast, 2 Eggs
-        2. 100g nuts, 2 Bananas
+breakfastMeals = "\n1 2 Toast, 2 Eggs\n2 100g Nuts, 2 Bananas\n"
+lunchMeals = "\n1 200g Buckwheat, 200g Cottage Cheese, 250g Broccoli\n2 200g Buckwheat, 200g Mozzarella, 1 Cucumber, 1 Tomato\n"
+dinnerMeals = "\n1 250g Oatmeal Pithy, 1 Apple, 100g Frozen Grapefruit\n2 250g Oatmeal Pithy, 1 Apple, 1 Banana\n"
 
-    Lunch
-        1. 200g Buckwheat, 200g Cottage Cheese, 250g Broccoli
-        2. 200g Buckwheat, 200g Mozzarella, 1 Cucumber, 1 Tomato
-    
-    Dinner
-        1. 250g Oatmeal Pithy, 1 Apple, 100g Frozen Grapefruit 
-        1. 250g Oatmeal Pithy, 1 Apple, 1 Banana
-
-    6. Confirm that you wish. y will add items to Todoist. n will exit the program.
-        Breakfast: X times
-        Lunch: X times
-        Dinner: X times
-
-        [y/n]
-
-    7. if yes call Api and add amount of items to shopping list
-
-
-    Create README at the end and create file with all dependencies
-
-
-'''
-numberBreakfast = 0
-numberLunch = 0
-numberDinner = 0
-
-breakfastMeals = "\n1 2 Toast, 2 Eggs\n2 100g nuts, 2 Bananas\n"
-lunchMeals =  "\n1 200g Buckwheat, 200g Cottage Cheese, 250g Broccoli\n2 200g Buckwheat, 200g Mozzarella, 1 Cucumber, 1 Tomato\n"
-dinnerMeals =  "\n1 250g Oatmeal Pithy, 1 Apple, 100g Frozen Grapefruit\n2 250g Oatmeal Pithy, 1 Apple, 1 Banana\n"
+lWithAllOptions = {breakfastMeals:"breakfast", lunchMeals:"lunch", dinnerMeals:"dinner"}
 
 optionsBreakfast = []
 optionsLunch = []
 optionsDinner = []
 
+lWithNumbers = []
+lWithStrings = []
 
-def test():
-    l = ["1", "2"]
-    if 1 in l:
-        print("sss")
+finalList = []
+
+def parserTodoist(para, val):
+    stringFinalList = ""
+    for key, value in lWithAllOptions.items():
+        if value == para:
+            splittedPara = key[1:-1].split("\n")
+            getCorrectOption = splittedPara[val-1]
+            getAllItems = "".join(getCorrectOption[1:].split(","))
+            nums = re.findall(r'\d+', getAllItems)
+            lWithNumbers.append(nums)
+            lWithNumbersFlatten = ([item for sublist in lWithNumbers for item in sublist])
+            for i in range(len(lWithNumbersFlatten)):
+                lWithNumbersFlatten[i] = int(lWithNumbersFlatten[i]) * dictTypeDay[para]
+    stringToAdd=""
+    splittedCorrectOption = getCorrectOption.split(",")
+    for i in splittedCorrectOption:
+        i = i.split(" ")
+        for j in i:
+            if any(char.isdigit() for char in j)==False:
+                stringToAdd = stringToAdd + j + " " 
+        lWithStrings.append(stringToAdd.rstrip().lstrip())
+        stringToAdd=""
+    
+    for i in range(len(lWithNumbersFlatten)):
+        if(lWithNumbersFlatten[i] > 50):
+            lWithNumbersFlatten[i] = str(lWithNumbersFlatten[i]) + "g"
+        stringFinalList = stringFinalList + str(lWithNumbersFlatten[i]) + " " + lWithStrings[i] + " "
+    return stringFinalList
+
+def addToTodoist(para):
+    split = para.split(" ")[:-1]
+    l = []
+    while(True):
+        try:
+            l.append(split[0] + " " + split[1])
+            split = split[2:]
+        except IndexError as e:
+            break
+    key = config.API_TOKEN
+    api = TodoistAPI(key)
+    api.sync()
+    for i in l:
+        try:
+            task = api.add_item(content=i, project_id=config.PROJECT_ID_INIT)
+        except Exception as error:
+            print("Some error happened during the API call to Todoist.")
+
+def todoist():
+    for key, value in dictTypeNumber.items():
+        result = parserTodoist(key, value)
+    print("The following list will be added to the grocery list. [y/n] \n\n"+result)
+    while(True):
+        i = input()
+        if i != "y" and i != "n" and i != "kill me":
+            print("\nNo valid input.")
+            continue
+        elif i == "n" or i == "kill me":
+            exit()
+        addToTodoist(result)
+        print("\nAdded items to Grocery list.")
+        exit()
 
 def parser():
     splittedBreakfast = breakfastMeals[1:-1].split("\n")
     for i in splittedBreakfast:
         optionsBreakfast.append(i[0])
-
     splittedLunch = lunchMeals[1:-1].split("\n")
     for i in splittedLunch:
         optionsLunch.append(i[0])
-    
     splittedDinner = dinnerMeals[1:-1].split("\n")
     for i in splittedDinner:
         optionsDinner.append(i[0])
@@ -90,7 +104,7 @@ def breakfast():
         except ValueError as e:
             print("\nNo valid input.")
             continue
-        numberBreakfast = input
+        dictTypeNumber.update({"breakfast":input})
         break
 
 def lunch():
@@ -103,7 +117,7 @@ def lunch():
         except ValueError as e:
             print("\nNo valid input.")
             continue
-        numberLunch = input
+        dictTypeNumber.update({"lunch":input})
         break
 
 def dinner():
@@ -116,7 +130,7 @@ def dinner():
         except ValueError as e:
             print("\nNo valid input.")
             continue
-        numberDinner = input
+        dictTypeNumber.update({"dinner":input})
         break
 
 def getInput():
@@ -124,9 +138,6 @@ def getInput():
     if i == "kill me":
         exit()
     return int(i)
-
-def todoist():
-    print("")
 
 def chooseMeal(daysBreakfast, daysLunch, daysDinner):
     print("\nNow choose meal.")
@@ -178,6 +189,7 @@ def start():
             print("\nNo valid input.")
             continue
         daysBreakfast = input
+        dictTypeDay.update({"breakfast":daysBreakfast})
         print("\nHow many lunch meals do you want to shop?")
         break
     while(True):
@@ -187,6 +199,7 @@ def start():
             print("\nNo valid input.")
             continue
         daysLunch = input
+        dictTypeDay.update({"lunch":daysLunch})
         print("\nHow many dinner meals do you want to shop?")
         break
     while(True):
@@ -196,6 +209,7 @@ def start():
             print("\nNo valid input.")
             continue
         daysDinner = input
+        dictTypeDay.update({"dinner":daysDinner})
         break
     chooseMeal(daysBreakfast, daysLunch, daysDinner)
 
