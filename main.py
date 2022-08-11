@@ -23,7 +23,7 @@ lWithStrings = []
 finalList = []
 
 def parserTodoist(para, val):
-    stringFinalList = ""
+    finalList = []
     for key, value in lWithAllOptions.items():
         if value == para:
             splittedPara = key[1:-1].split("\n")
@@ -43,35 +43,27 @@ def parserTodoist(para, val):
                 stringToAdd = stringToAdd + j + " " 
         lWithStrings.append(stringToAdd.rstrip().lstrip())
         stringToAdd=""
-    
     for i in range(len(lWithNumbersFlatten)):
         if(lWithNumbersFlatten[i] > 50):
             lWithNumbersFlatten[i] = str(lWithNumbersFlatten[i]) + "g"
-        stringFinalList = stringFinalList + str(lWithNumbersFlatten[i]) + " " + lWithStrings[i] + " "
-    return stringFinalList
+        finalList.append(str(lWithNumbersFlatten[i]) + " " + lWithStrings[i])
+    return finalList
 
 def addToTodoist(para):
-    split = para.split(" ")[:-1]
-    l = []
-    while(True):
-        try:
-            l.append(split[0] + " " + split[1])
-            split = split[2:]
-        except IndexError as e:
-            break
     key = config.API_TOKEN
     api = TodoistAPI(key)
     api.sync()
-    for i in l:
+    for i in para:
         try:
             task = api.add_item(content=i, project_id=config.PROJECT_ID_INIT)
         except Exception as error:
             print("Some error happened during the API call to Todoist.")
-
+    
 def todoist():
     for key, value in dictTypeNumber.items():
         result = parserTodoist(key, value)
-    print("The following list will be added to the grocery list. [y/n] \n\n"+result)
+    resultAsString = " ".join(result)
+    print("The following list will be added to the grocery list. [y/n] \n\n"+resultAsString)
     while(True):
         i = input()
         if i != "y" and i != "n" and i != "kill me":
