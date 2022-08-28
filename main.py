@@ -8,7 +8,7 @@ dictTypeNumber = {}
 dictTypeDay = {}
 
 breakfastMeals = "\n1 2 Toast, 2 Eggs\n2 100g Nuts, 2 Bananas\n"
-lunchMeals = "\n1 200g Buckwheat, 200g Cottage Cheese, 250g Broccoli\n2 200g Buckwheat, 200g Mozzarella, 1 Cucumber, 1 Tomato\n"
+lunchMeals = "\n1 200g Buckwheat, 200g Cottage Cheese, 250g Broccoli\n2 200g Buckwheat, 200g Mozzarella, 1 Cucumber, 1 Tomato\n3 200g Quinoa, 200g Cheddah Cheese, 200g Broccoli\n" 
 dinnerMeals = "\n1 250g Oatmeal Pithy, 1 Apple, 100g Frozen Grapefruit\n2 250g Oatmeal Pithy, 1 Apple, 1 Banana\n"
 
 lWithAllOptions = {breakfastMeals:"breakfast", lunchMeals:"lunch", dinnerMeals:"dinner"}
